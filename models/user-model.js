@@ -31,16 +31,16 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.methods.isStudent = () => {
+userSchema.methods.isStudent = function () {
   return this.role == "student";
 };
 
-userSchema.methods.isInstructor = () => {
+userSchema.methods.isInstructor = function () {
   return this.role == "instructor";
 };
 
 // mongoose schema middleware
-userSchema.pre("save", async (next) => {
+userSchema.pre("save", async function (next) {
   // this: 當下這筆資料
   if (this.isModified("password") || this.isNew) {
     const hash = await bcrypt.hash(this.password, 10);
@@ -50,16 +50,5 @@ userSchema.pre("save", async (next) => {
     return next();
   }
 });
-
-userSchema.methods.comparePassword = (plainPassword, cb) => {
-  // plainPassword: 使用者輸入的原始密碼
-  // hash 過的密碼
-  bcrypt.compare(plainPassword, this.password, (err, isMatch) => {
-    if (err) {
-      return cb(err, isMatch);
-    }
-    cb(null, isMatch);
-  });
-};
 
 module.exports = mongoose.model("User", userSchema);
