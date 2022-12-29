@@ -2,6 +2,7 @@ const router = require("express").Router();
 const registerValidation = require("../validation").registerValidation;
 const loginValidation = require("../validation").loginValidation;
 const User = require("../models").userModel;
+const jwt = require("jsonwebtoken");
 
 router.use((req, res, next) => {
   console.log("A request is coming in to auth.js");
@@ -16,8 +17,6 @@ router.get("/testAPI", (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  // let { email, username, password, role } = req.body;
-
   // check the validation of data
   const { error } = registerValidation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -47,6 +46,35 @@ router.post("/register", async (req, res) => {
     res.status(400).send("User not saved.");
     throw new Error(error);
   }
+});
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  // check the validation of data
+  const { error } = loginValidation(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  User.findOne({ email }, (err, user) => {
+    if (err) {
+      res.status(400).send(err);
+    }
+    if (!user) {
+      res.status(401).send("User not found.");
+    } else {
+      user.comparePassword(password, function (err, isMatch) {
+        if (err) return res.status(400).send(err);
+
+        if (isMatch) {
+          const tokenObject = { _id: user._id, email: user.email };
+          const token = jwt.sign(tokenObject, process.env.PASSPORT_SECRET);
+          res.send({ success: true, token: "JWT " + token, user });
+        } else {
+          res.status(401).send("Wrong password.");
+        }
+      });
+    }
+  });
 });
 
 module.exports = router;
