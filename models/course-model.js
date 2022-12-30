@@ -18,7 +18,7 @@ const courseSchema = new mongoose.Schema({
   },
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "User", // 和 user 關聯
   },
   students: {
     type: [String],
