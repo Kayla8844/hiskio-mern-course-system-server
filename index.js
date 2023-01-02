@@ -9,6 +9,7 @@ const courseRoute = require("./routes").course;
 
 const passport = require("passport");
 require("./config/passport")(passport);
+const cors = require("cors"); // 開多個 server
 
 // 連接資料庫網址 (mongodb atlas)
 mongoose
@@ -28,6 +29,7 @@ app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(cors()); // 一定要放在 route 上方
 app.use("/api/user", authRoute); // /api 為了 react 使用方便
 
 // course route 需要登入才能進
